@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="format-detection" content="telephone=no" />
+<title>sign</title>
+<style type="text/css">
+	*{margin: 0;padding: 0}
+	html{
+		height: 100%;
+	}
+	body{
+		background: #acacac;
+		height: 100%;
+		line-height: 1.5;
+		-webkit-user-select: none;
+	}
+	a{
+		text-decoration: none;
+	}
+	.title{
+		line-height: 30px;
+		text-align: center;
+		font-size: 20px;
+		line-height: 2.0;
+	}
+	.handler{
+		display: box;
+		display: -webkit-box;
+		display: flex;
+		display: -webkit-flex;
+		position: fixed;
+		bottom: 10px;
+		left: 0;
+		width: 100%;
+	}
+	.handler_a{
+		-webkit-box-flex: 1;
+		box-flex: 1;
+		-webkit-flex: 1;
+		flex: 1;
+		margin: 0 10px;
+		border-radius: 5px;
+	}
+	.green_btn{
+		background: green;
+		color: #fff;
+		height: 40px;
+		line-height: 40px;
+		text-align: center;
+	}
+	#sign_box{
+		width: 100%;
+
+		background: #fff;
+	}
+</style>
+</head>
+<body>
+	<p class="title">请在下方白色区域签名</p>
+	<div class="signW">
+		
+	</div>
+	<div class="handler">
+		<a href="javascript:;" class="handler_a green_btn clearBtn">清除</a>
+		<a href="javascript:;" class="handler_a green_btn undoBtn">撤销</a>
+		<a href="javascript:;" class="handler_a green_btn saveBtn">确定</a>
+	</div>
+</body>
+<!-- <script type="text/javascript" src="http://zeptojs.com/zepto.min.js"></script> -->
+<script type="text/javascript">
+	document.querySelector('body').addEventListener('touchmove', function(e){
+		e.preventDefault();
+	});
+	/*options*/
+	var WdivH = 1.5,
+		drawWidth = window.screen.width,
+		drawHeight = drawWidth/WdivH,
+		strokeStyle = '#000',
+		lineWidth = '5',
+		lineCap = 'round',
+		scale = 0.8;//画布转成图片的质量等级
+
+
+
+	var drawing = document.createElement('canvas');
+	drawing.id = 'sign_box';
+	drawing.width = drawWidth;
+	drawing.height = drawHeight;
+	document.querySelector('.signW').appendChild(drawing);
+
+	var context = drawing.getContext('2d');
+	if(!context){
+		alert('您的浏览器版本过低，请升级！');
+	}
+	context.strokeStyle = strokeStyle;
+	context.lineWidth = lineWidth;
+	context.lineCap = lineCap;
+	var imageDataNull = context.getImageData(0, 0, drawWidth, drawHeight);
+
+	var offsetTop = drawing.offsetTop,//60
+		offsetLeft = drawing.offsetLeft;
+
+	drawing.addEventListener('touchstart', function (e) {
+		context.beginPath();
+		var x0 = e.touches[0].pageX - offsetLeft,
+			y0 = e.touches[0].pageY - offsetTop;
+		context.moveTo(x0-0.1, y0-0.1);
+		context.lineTo(x0, y0);
+		context.stroke();
+		context.closePath();
+	}, false);
+	drawing.addEventListener('touchmove', function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+		var x0 = e.touches[0].pageX - offsetLeft,
+			y0 = e.touches[0].pageY - offsetTop;
+		//console.log(e.touches[0].pageY, offsetTop,y0);
+		context.lineTo(x0, y0);
+		context.stroke();
+		context.closePath();
+		context.beginPath();
+		context.moveTo(x0, y0);
+	}, false);
+	drawing.addEventListener('touchend', function (e) {
+		context.save();
+	}, false);
+
+
+
+
+	//清除
+	var clearBtn = document.querySelector('.clearBtn');
+	clearBtn.addEventListener('touchend', function(){
+		context.putImageData(imageDataNull, 0, 0);
+	});
+
+	//撤销
+	var undoBtn = document.querySelector('.undoBtn');
+	undoBtn.addEventListener('touchend', function(){
+		context.restore();
+		console.log(context)
+	});
+
+	//保存图片
+	var saveBtn = document.querySelector('.saveBtn');
+	saveBtn.addEventListener('touchend', function(){
+		var signData = drawing.toDataURL("image/jpeg", scale);
+	});
+</script>
+</html>
